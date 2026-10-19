@@ -1,0 +1,68 @@
+name: heart-disease-mlops-ci
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  validate-train-test:
+    name: Validate, train, test, and build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Run linting
+        run: |
+          python -m ruff check app scripts tests
+
+      - name: Download dataset
+        run: |
+          python -m scripts.download_data
+
+      - name: Prepare processed dataset
+        run: |
+          python -m scripts.prepare_data
+
+      - name: Generate EDA outputs
+        run: |
+          python -m scripts.eda
+
+      - name: Train and track models
+        run: |
+          python -m scripts.train --tracking-uri file:./mlruns
+
+      - name: Run unit tests
+        run: |
+          python -m pytest -q
+
+      - name: Build Docker image
+        run: |
+          docker build -t heart-disease-api:ci .
+
+      - name: Upload model and experiment artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: heart-disease-mlops-artifacts
+          path: |
+            artifacts/
+            outputs/eda/
+            mlruns/
+            data/processed/
+          if-no-files-found: warn
