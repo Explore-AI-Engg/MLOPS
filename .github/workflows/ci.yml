@@ -45,7 +45,11 @@ jobs:
 
       - name: Train and track models
         run: |
-          python -m scripts.train --tracking-uri file:./mlruns
+          # 1. Wipe out any pre-existing or committed local metadata folders 
+          rm -rf mlruns/
+          
+          # 2. Train using an explicit absolute path native to this Linux runner
+          python -m scripts.train --tracking-uri file:${{ github.workspace }}/mlruns
 
       - name: Run unit tests
         run: |
