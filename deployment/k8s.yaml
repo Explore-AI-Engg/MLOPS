@@ -17,39 +17,33 @@ spec:
       containers:
         - name: api
           image: ghcr.io/explore-ai-engg/heart-disease-api:latest
-          # 🌟 CRITICAL FIX: Forces Kubernetes to pull the newly built image every time
-          imagePullPolicy: Always 
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8000
-
-          # 🌟 FIX: Relax probe configurations to allow ML models to load into memory
           readinessProbe:
             httpGet:
               path: /health
               port: http
-            initialDelaySeconds: 30 # Increased from 10 to give your Python app startup time
+            initialDelaySeconds: 30
             periodSeconds: 5
             timeoutSeconds: 3
             failureThreshold: 6
-
           livenessProbe:
             httpGet:
               path: /health
               port: http
-            initialDelaySeconds: 45 # Increased from 20 so liveness doesn't kill it prematurely
+            initialDelaySeconds: 45
             periodSeconds: 10
             timeoutSeconds: 3
             failureThreshold: 3
-
           resources:
             requests:
-              cpu: 50m      # 🌟 UPDATED: Lowered from 100m to fit tight cluster space
-              memory: 64Mi  # 🌟 UPDATED: Lowered from 256Mi to allow scheduling
+              cpu: 250m       # 🚀 UPDATED: Increased from 100m for faster startup
+              memory: 512Mi   # 🚀 UPDATED: Increased from 256Mi to accommodate model loading
             limits:
-              cpu: 500m
-              memory: 512Mi
-
+              cpu: "1"        # 🚀 UPDATED: Increased from 500m to handle prediction bursts
+              memory: 1Gi     # 🚀 UPDATED: Increased from 512Mi to prevent OOM (Out Of Memory) kills
 ---
 apiVersion: v1
 kind: Service
