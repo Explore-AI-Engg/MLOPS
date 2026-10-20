@@ -29,13 +29,13 @@ jobs:
 
       - name: Build Docker image
         run: |
-          IMAGE="ghcr.io/${{ github.repository_owner }}/heart-disease-api"
+          IMAGE="ghcr.io/explore-ai-engg/heart-disease-api"
           docker build -t "$IMAGE:${{ github.sha }}" .
           docker tag "$IMAGE:${{ github.sha }}" "$IMAGE:latest"
 
       - name: Push Docker image
         run: |
-          IMAGE="ghcr.io/${{ github.repository_owner }}/heart-disease-api"
+          IMAGE="ghcr.io/explore-ai-engg/heart-disease-api"
           docker push "$IMAGE:${{ github.sha }}"
           docker push "$IMAGE:latest"
 
@@ -59,10 +59,10 @@ jobs:
         run: |
           kubectl apply -f deployment/k8s.yaml
 
-      - name: Update deployment image
+      - name: Update image to this commit
         run: |
           kubectl set image deployment/heart-disease-api \
-            api=ghcr.io/${{ github.repository_owner }}/heart-disease-api:${{ github.sha }}
+            api=ghcr.io/explore-ai-engg/heart-disease-api:${{ github.sha }}
 
       - name: Wait for rollout
         run: |

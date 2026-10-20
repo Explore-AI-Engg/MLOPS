@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: heart-disease-api:main
+          image: ghcr.io/explore-ai-engg/heart-disease-api:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: http
