@@ -281,7 +281,26 @@ python -m pytest -q
 uvicorn app.api:app --host 0.0.0.0 --port 8000
 ```
 
-The single learning notebook, when present under `notebooks/`, explains the same lifecycle interactively. The scripts remain the source of truth for CI/CD because they are deterministic command-line entry points.
+The repository also includes the guided learning notebook:
+
+`notebooks/end_to_end_mlops_understanding.ipynb`
+
+The notebook is intentionally educational rather than a second production implementation. Its sections explain:
+
+1. Problem definition and dataset meaning.
+2. Missing-value inspection and binary-target preparation.
+3. Exploratory visualizations.
+4. Feature engineering and leakage prevention.
+5. Logistic Regression and Random Forest comparison.
+6. Cross-validation metric interpretation.
+7. MLflow and persisted model artifacts.
+8. API inference, Docker, Kubernetes, and monitoring concepts.
+
+The notebook imports the same reusable `app/` modules used by the scripts, so the student can inspect the reasoning interactively while the scripts remain the source of truth for CI/CD. Run it from the project root:
+
+```bash
+jupyter notebook notebooks/end_to_end_mlops_understanding.ipynb
+```
 
 ## 13. Evidence checklist
 
