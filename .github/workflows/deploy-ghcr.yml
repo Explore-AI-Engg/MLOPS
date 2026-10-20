@@ -10,6 +10,7 @@ permissions:
   contents: read
   packages: write
   id-token: write
+  actions: read       # 🌟 FIX: Grants GITHUB_TOKEN permission to look up cross-workflow run IDs
 
 jobs:
   deploy:
@@ -20,7 +21,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      # 🌟 FIX PART 1: Get the run ID of the latest successful CI workflow run
+      # 🌟 Get the run ID of the latest successful CI workflow run
       - name: Get latest CI workflow run ID
         id: get-run-id
         run: |
@@ -33,7 +34,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 🌟 FIX PART 2: Download the artifact using the retrieved run-id and a GitHub token
+      # 🌟 Download the artifact using the retrieved run-id and a GitHub token
       - name: Download model artifacts
         uses: actions/download-artifact@v4
         with:
@@ -83,13 +84,32 @@ jobs:
 
       - name: Update image to this commit
         run: |
+          # 🌟 UPDATED: Directs Kubernetes to run the specific image tag we just built
           kubectl set image deployment/heart-disease-api \
             api=ghcr.io/explore-ai-engg/heart-disease-api:${{ github.sha }}
 
       - name: Wait for rollout
+        id: rollout
+        continue-on-error: true # 🌟 FIX: Keeps the pipeline moving so the debug log step can print errors
         run: |
-          kubectl rollout status deployment/heart-disease-api --timeout=180s
+          kubectl rollout status deployment/heart-disease-api --timeout=240s
 
+      # 🌟 NEW DEBUG STEP: If the rollout fails, this prints container error logs directly inside GitHub Actions
+      - name: Print Container Logs and Status on Failure
+        run: |
+          echo "=== POD STATUS ==="
+          kubectl get pods -l app=heart-disease-api
+          
+          echo "=== RECENT KUBERNETES EVENTS ==="
+          kubectl describe pod -l app=heart-disease-api | tail -n 25
+          
+          echo "=== APPLICATION ERROR LOGS ==="
+          kubectl logs deployment/heart-disease-api --all-containers=true --tail=100
+          
+          # Force pipeline failure if the rollout status check step timed out
+          kubectl rollout status deployment/heart-disease-api --timeout=1s
+
+      # 🌟 Displays final infrastructure topology status if the rollout succeeded
       - name: Display deployment status
         run: |
           kubectl get deployments
