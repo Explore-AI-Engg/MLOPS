@@ -1,0 +1,562 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Length 2490 >>
+stream
+BT
+/F1 8.5 Tf
+50 780 Td
+11 TL
+(END-TO-END MLOPS PROJECT REPORT) Tj T*
+() Tj T*
+(HEART DISEASE RISK CLASSIFICATION API) Tj T*
+() Tj T*
+(Student: Santhosh Mohan) Tj T*
+(BITS ID: 2025ae05426) Tj T*
+(Repository: https://github.com/Explore-AI-Engg/MLOPS) Tj T*
+(Dataset: UCI Cleveland Heart Disease dataset) Tj T*
+(Project status: Local pipeline and GKE deployment verified; GitHub Actions success evidence) Tj T*
+(is pending the next workflow run) Tj T*
+() Tj T*
+( This report is written from the implementation in this repository. The supplied reference) Tj T*
+(report was used only to understand a possible academic report structure. Its wording,) Tj T*
+(screenshots, code, and numerical results are not used here.) Tj T*
+() Tj T*
+(ABSTRACT) Tj T*
+() Tj T*
+(This project implements a reproducible machine-learning service for binary heart-disease) Tj T*
+(risk classification. The solution begins with scripted acquisition of the UCI dataset,) Tj T*
+(validates and transforms the data, compares Logistic Regression and Random Forest models,) Tj T*
+(tracks experiments with MLflow, and persists the selected preprocessing-and-model pipeline) Tj T*
+(as a Joblib artifact. A FastAPI service exposes health, prediction, and Prometheus metrics) Tj T*
+(endpoints. Automated tests and linting run in GitHub Actions, while a Docker image packages) Tj T*
+(the API and trained artifact for deployment to Google Kubernetes Engine \(GKE\).) Tj T*
+() Tj T*
+(The project deliberately keeps preprocessing inside the persisted scikit-learn pipeline.) Tj T*
+(This prevents training-serving skew: the same imputers, scaling rules, and categorical) Tj T*
+(encoding learned during training are used for API requests. Operational logs exclude patient) Tj T*
+(feature values and record only request metadata, status, and latency.) Tj T*
+() Tj T*
+(1. PROJECT OBJECTIVE AND ARCHITECTURE) Tj T*
+() Tj T*
+(The objective is to demonstrate the complete lifecycle rather than only achieve a high) Tj T*
+(offline score:) Tj T*
+() Tj T*
+(1. Acquire and validate data.) Tj T*
+(2. Explore data quality, distributions, correlation, and class balance.) Tj T*
+(3. Train at least two classifiers using a reproducible pipeline.) Tj T*
+(4. Select a model using cross-validation and clinically relevant metrics.) Tj T*
+(5. Track parameters, metrics, plots, and model artifacts.) Tj T*
+(6. Test data processing, modeling, and API behavior.) Tj T*
+(7. Package the service in Docker.) Tj T*
+(8. Deploy the image to Kubernetes.) Tj T*
+ET
+endstream
+endobj
+3 0 obj
+<< /Length 1709 >>
+stream
+BT
+/F1 8.5 Tf
+50 780 Td
+11 TL
+(9. Expose health, prediction, logs, and metrics for operation.) Tj T*
+() Tj T*
+(The logical flow is:) Tj T*
+() Tj T*
+(text) Tj T*
+(UCI dataset) Tj T*
+(    - download_data.py) Tj T*
+(    - prepare_data.py) Tj T*
+(    - eda.py) Tj T*
+(    - train.py + MLflow) Tj T*
+(    - artifacts/model.joblib) Tj T*
+(    - Docker image) Tj T*
+(    - GHCR) Tj T*
+(    - GKE Deployment) Tj T*
+(    - LoadBalancer Service) Tj T*
+(    - /health, /predict, /metrics) Tj T*
+() Tj T*
+() Tj T*
+(The repository separates responsibilities:) Tj T*
+() Tj T*
+(- app/: reusable application and preprocessing code.) Tj T*
+(- scripts/: repeatable data, EDA, training, and smoke-test entry points.) Tj T*
+(- tests/: automated tests.) Tj T*
+(- artifacts/: persisted models and metadata.) Tj T*
+(- outputs/eda/: generated visualizations.) Tj T*
+(- deployment/: Kubernetes resources.) Tj T*
+(- .github/workflows/: CI and deployment automation.) Tj T*
+() Tj T*
+(2. DATA ACQUISITION AND PREPARATION) Tj T*
+() Tj T*
+(The download script obtains the public UCI archive from the configured source URL and writes) Tj T*
+(a validated raw CSV. The Cleveland dataset contains 303 observations and 13 predictor) Tj T*
+(columns. The original target uses values from 0 to 4; this project maps 0 to no observed) Tj T*
+(disease and values 1 through 4 to disease present.) Tj T*
+() Tj T*
+(The data preparation process:) Tj T*
+() Tj T*
+(1. Checks the expected columns and row structure.) Tj T*
+(2. Converts the target to a binary value.) Tj T*
+(3. Represents missing values explicitly.) Tj T*
+(4. Writes the processed CSV under data/processed/.) Tj T*
+(5. Leaves the raw download available for reproducibility.) Tj T*
+() Tj T*
+ET
+endstream
+endobj
+4 0 obj
+<< /Length 2319 >>
+stream
+BT
+/F1 8.5 Tf
+50 780 Td
+11 TL
+(The input features are:) Tj T*
+() Tj T*
+(age, sex, cp, trestbps, chol, fbs, restecg, thalach, exang, oldpeak, slope, ca, and thal.) Tj T*
+() Tj T*
+(The dataset is small, so the project uses stratified splitting and cross-validation. This) Tj T*
+(preserves the approximate class ratio in training and validation partitions. The model) Tj T*
+(should not be interpreted as a clinical diagnostic system: the dataset is limited in size) Tj T*
+(and scope, and a real medical application would require external validation, clinical) Tj T*
+(review, calibration, and regulatory controls.) Tj T*
+() Tj T*
+(3. EXPLORATORY DATA ANALYSIS) Tj T*
+() Tj T*
+(The EDA script creates:) Tj T*
+() Tj T*
+(- Feature distribution plots to identify scale differences and unusual values.) Tj T*
+(- A correlation heatmap to inspect linear relationships.) Tj T*
+(- A class-balance chart to show target proportions.) Tj T*
+(- A JSON summary for repeatable numerical inspection.) Tj T*
+() Tj T*
+(EDA informs the design without becoming a source of leakage. The target is not used to fit) Tj T*
+(imputers or scalers. The generated files are:) Tj T*
+() Tj T*
+(- outputs/eda/feature_distributions.png) Tj T*
+(- outputs/eda/correlation_heatmap.png) Tj T*
+(- outputs/eda/class_balance.png) Tj T*
+(- outputs/eda/summary.json) Tj T*
+() Tj T*
+(These outputs should be included in the final submission under evidence/ or linked from the) Tj T*
+(report after capturing the final repository state.) Tj T*
+() Tj T*
+(4. FEATURE ENGINEERING AND MODEL DEVELOPMENT) Tj T*
+() Tj T*
+(The model pipeline divides variables into numeric and categorical groups. Numeric columns) Tj T*
+(use median imputation followed by standard scaling. Categorical columns use most-frequent) Tj T*
+(imputation followed by one-hot encoding with unknown-category handling. The classifier is) Tj T*
+(attached to the same ColumnTransformer pipeline.) Tj T*
+() Tj T*
+(This design was selected for three reasons:) Tj T*
+() Tj T*
+(1. Median imputation is robust to a small number of missing clinical measurements.) Tj T*
+(2. Scaling supports Logistic Regression optimization and prevents large-unit variables from) Tj T*
+(dominating the regularized objective.) Tj T*
+(3. One-hot encoding makes categorical values usable by scikit-learn estimators while) Tj T*
+ET
+endstream
+endobj
+5 0 obj
+<< /Length 2203 >>
+stream
+BT
+/F1 8.5 Tf
+50 780 Td
+11 TL
+(handle_unknown="ignore" protects the API from an unseen category.) Tj T*
+() Tj T*
+(Two models are trained:) Tj T*
+() Tj T*
+(- Logistic Regression: a transparent linear baseline with stable probabilities.) Tj T*
+(- Random Forest: a nonlinear ensemble that can capture interactions and threshold effects.) Tj T*
+() Tj T*
+(Five-fold stratified cross-validation is used for comparison. The primary selection metric) Tj T*
+(is cross-validation ROC-AUC because it evaluates ranking quality across thresholds.) Tj T*
+(Accuracy, precision, and recall are also reported because they describe different) Tj T*
+(operational trade-offs.) Tj T*
+() Tj T*
+(5. RESULTS) Tj T*
+() Tj T*
+(The selected model in the current artifact is Logistic Regression. The recorded results are:) Tj T*
+() Tj T*
+(   Evaluation    Accuracy    Precision    Recall    ROC-AUC) Tj T*
+(  ---  ---:  ---:  ---:  ---:) Tj T*
+(   5-fold cross-validation    0.8471    0.8768    0.7834    0.9025) Tj T*
+(   Holdout test set    0.8852    0.8387    0.9286    0.9665) Tj T*
+() Tj T*
+(The holdout recall is higher than the cross-validation recall. This is expected from a) Tj T*
+(single finite split and is why the cross-validation result is used for model selection) Tj T*
+(rather than relying on one holdout number. These results demonstrate a functioning) Tj T*
+(educational classifier; they do not establish clinical performance.) Tj T*
+() Tj T*
+(The artifact metadata records the model name, MLflow run identifier, dataset hash, feature) Tj T*
+(count, selection metric, and evaluation metrics. This makes the deployed model traceable to) Tj T*
+(a specific training input and experiment.) Tj T*
+() Tj T*
+(6. MLFLOW EXPERIMENT TRACKING AND REPRODUCIBILITY) Tj T*
+() Tj T*
+(Each training run logs:) Tj T*
+() Tj T*
+(- Model and preprocessing parameters.) Tj T*
+(- Cross-validation and holdout metrics.) Tj T*
+(- Evaluation plots.) Tj T*
+(- Dataset hash.) Tj T*
+(- The selected model artifact and metadata.) Tj T*
+() Tj T*
+(The local file tracking store is mlruns/. A dataset hash is recorded so a future run can) Tj T*
+(identify whether the input data changed. The reproducible training sequence is:) Tj T*
+() Tj T*
+ET
+endstream
+endobj
+6 0 obj
+<< /Length 1740 >>
+stream
+BT
+/F1 8.5 Tf
+50 780 Td
+11 TL
+(bash) Tj T*
+(python -m scripts.download_data) Tj T*
+(python -m scripts.prepare_data) Tj T*
+(python -m scripts.eda) Tj T*
+(python -m scripts.train --tracking-uri file:./mlruns) Tj T*
+() Tj T*
+() Tj T*
+(The model is saved as artifacts/model.joblib. Saving the complete pipeline, rather than only) Tj T*
+(the classifier, is essential because inference must repeat imputation, scaling, and encoding) Tj T*
+(exactly as training did.) Tj T*
+() Tj T*
+(7. API IMPLEMENTATION) Tj T*
+() Tj T*
+(The FastAPI service provides:) Tj T*
+() Tj T*
+(- GET /health: returns 200 when the model artifact is loaded and 503 when it is unavailable.) Tj T*
+(- POST /predict: validates one 13-feature JSON payload and returns a binary prediction,) Tj T*
+(confidence, and model version.) Tj T*
+(- GET /metrics: returns Prometheus-compatible request counters and latency histograms.) Tj T*
+() Tj T*
+(The Pydantic request model rejects unknown fields and applies reasonable range checks. The) Tj T*
+(API middleware records HTTP method, path, status, and latency. It intentionally does not log) Tj T*
+(raw patient features.) Tj T*
+() Tj T*
+(Example local request:) Tj T*
+() Tj T*
+(bash) Tj T*
+(curl -X POST http://127.0.0.1:8000/predict \\) Tj T*
+(  -H 'Content-Type: application/json' \\) Tj T*
+(  -d '{"age":63,"sex":1,"cp":3,"trestbps":145,"chol":233,"fbs":1,"restecg":0,"thalach":150,") Tj T*
+(exang":0,"oldpeak":2.3,"slope":0,"ca":0,"thal":1}') Tj T*
+() Tj T*
+() Tj T*
+(For local operation:) Tj T*
+() Tj T*
+(bash) Tj T*
+(uvicorn app.api:app --host 0.0.0.0 --port 8000) Tj T*
+(curl http://127.0.0.1:8000/health) Tj T*
+(curl http://127.0.0.1:8000/metrics) Tj T*
+() Tj T*
+() Tj T*
+(8. TESTING AND CONTINUOUS INTEGRATION) Tj T*
+() Tj T*
+ET
+endstream
+endobj
+7 0 obj
+<< /Length 1733 >>
+stream
+BT
+/F1 8.5 Tf
+50 780 Td
+11 TL
+(The test suite covers:) Tj T*
+() Tj T*
+(- Required data columns and target conversion.) Tj T*
+(- Preprocessor construction and transformations.) Tj T*
+(- Model training and prediction behavior.) Tj T*
+(- API health and prediction responses.) Tj T*
+() Tj T*
+(The CI workflow performs linting, downloads data, prepares data, generates EDA outputs,) Tj T*
+(trains the model, runs Pytest, builds the Docker image, and uploads artifacts. This ordering) Tj T*
+(catches failures before a deployment image is published.) Tj T*
+() Tj T*
+(Recommended local validation:) Tj T*
+() Tj T*
+(bash) Tj T*
+(python -m ruff check app scripts tests) Tj T*
+(python -m pytest -q) Tj T*
+(docker build -t heart-disease-api:local .) Tj T*
+() Tj T*
+() Tj T*
+(9. CONTAINERIZATION) Tj T*
+() Tj T*
+(The Docker image installs the pinned project dependencies, copies the app/ package and) Tj T*
+(trained artifacts/, and starts Uvicorn on port 8000. The model artifact must be present in) Tj T*
+(the image; otherwise the service correctly reports 503 from /health rather than claiming) Tj T*
+(readiness.) Tj T*
+() Tj T*
+(The deployment workflow therefore trains and verifies artifacts/model.joblib before the) Tj T*
+(Docker build. The image name is lowercase because Docker and GHCR reject uppercase) Tj T*
+(repository components:) Tj T*
+() Tj T*
+(text) Tj T*
+(ghcr.io/explore-ai-engg/heart-disease-api) Tj T*
+() Tj T*
+() Tj T*
+(Before deploying a new image, verify the artifact directly:) Tj T*
+() Tj T*
+(bash) Tj T*
+(docker run --rm --entrypoint sh heart-disease-api:local \\) Tj T*
+(  -c 'test -f /app/artifacts/model.joblib && ls -lh /app/artifacts') Tj T*
+() Tj T*
+() Tj T*
+(10. KUBERNETES AND DEPLOYMENT STATUS) Tj T*
+() Tj T*
+ET
+endstream
+endobj
+8 0 obj
+<< /Length 2152 >>
+stream
+BT
+/F1 8.5 Tf
+50 780 Td
+11 TL
+(The Kubernetes manifest defines a Deployment named heart-disease-api and a Service for) Tj T*
+(external access. The Deployment uses a readiness check against /health, so traffic is not) Tj T*
+(sent to a pod before the model is loaded.) Tj T*
+() Tj T*
+(An earlier GKE rollout returned 503 from /health and entered CrashLoopBackOff. That was a) Tj T*
+(real failure signal and was not used as successful evidence. Investigation showed that the) Tj T*
+(single e2-small node could not schedule the replacement pod because the previous resource) Tj T*
+(requests were too large for available memory. The deployment was corrected by using a) Tj T*
+(Recreate strategy, lower resource requests, and a startup probe. The corrected rollout) Tj T*
+(completed successfully.) Tj T*
+() Tj T*
+(1. The workflow ran for the branch that was pushed.) Tj T*
+(2. The build context contains artifacts/model.joblib.) Tj T*
+(3. The pushed image digest is the image used by the Deployment.) Tj T*
+(4. The pod can read /app/artifacts/model.joblib.) Tj T*
+(5. The pod logs identify any model-loading exception.) Tj T*
+(6. The Deployment reaches 1/1 ready replicas before the external URL is tested.) Tj T*
+() Tj T*
+(The deployment workflow has been updated to run on both main and master, to train before) Tj T*
+(building, and to print diagnostics only when a rollout step fails. A public API URL should) Tj T*
+(be added to this report only after all of the following succeed:) Tj T*
+() Tj T*
+(bash) Tj T*
+(kubectl rollout status deployment/heart-disease-api --timeout=180s) Tj T*
+(kubectl get service heart-disease-api) Tj T*
+(curl http://EXTERNAL_IP/health) Tj T*
+(curl -X POST http://EXTERNAL_IP/predict -H 'Content-Type: application/json' -d '...') Tj T*
+() Tj T*
+() Tj T*
+(The verified public service is:) Tj T*
+() Tj T*
+(text) Tj T*
+(http://104.154.36.8:8000) Tj T*
+() Tj T*
+() Tj T*
+(Observed Kubernetes state after the fix:) Tj T*
+() Tj T*
+(text) Tj T*
+(deployment/heart-disease-api: 1/1 available) Tj T*
+(pod: heart-disease-api-6d655b99b7-lcpfl  1/1 Running) Tj T*
+(service: LoadBalancer  EXTERNAL-IP 104.154.36.8) Tj T*
+() Tj T*
+() Tj T*
+ET
+endstream
+endobj
+9 0 obj
+<< /Length 1997 >>
+stream
+BT
+/F1 8.5 Tf
+50 780 Td
+11 TL
+(Verified endpoint responses:) Tj T*
+() Tj T*
+(text) Tj T*
+(GET /health - 200) Tj T*
+({"status":"ready","model":"c235876a9c844214ab4a68fd3c0e07db"}) Tj T*
+() Tj T*
+(POST /predict - 200) Tj T*
+({"prediction":0,"confidence":0.814063,"model_version":"c235876a9c844214ab4a68fd3c0e07db"}) Tj T*
+() Tj T*
+(GET /metrics - 200) Tj T*
+(Prometheus metrics included heart_disease_api_requests_total and) Tj T*
+(heart_disease_api_request_latency_seconds.) Tj T*
+() Tj T*
+() Tj T*
+(The earlier failed rollout may be included in a troubleshooting section, but it must not be) Tj T*
+(presented as successful deployment evidence.) Tj T*
+() Tj T*
+(11. MONITORING, LOGGING, PRIVACY, AND SECURITY) Tj T*
+() Tj T*
+(Prometheus counters measure request totals by endpoint and status. A latency histogram) Tj T*
+(records request duration. These signals can be scraped by Prometheus and visualized in) Tj T*
+(Grafana, or inspected directly through /metrics.) Tj T*
+() Tj T*
+(Operational logging includes method, route, status, and latency. It does not include the) Tj T*
+(JSON body. This reduces accidental exposure of health information in logs. Production) Tj T*
+(hardening would additionally require authentication, TLS, network policy, secret management,) Tj T*
+(rate limiting, audit controls, and a formal privacy review.) Tj T*
+() Tj T*
+(GitHub Actions authenticates to Google Cloud using Workload Identity Federation rather than) Tj T*
+(a long-lived service-account key. The provider secret must contain the full provider) Tj T*
+(resource name without a https:// or //iam.googleapis.com/ prefix.) Tj T*
+() Tj T*
+(12. REPRODUCTION GUIDE) Tj T*
+() Tj T*
+(bash) Tj T*
+(git clone https://github.com/Explore-AI-Engg/MLOPS.git) Tj T*
+(cd heart-disease-mlops) Tj T*
+(python3 -m venv .venv) Tj T*
+(source .venv/bin/activate) Tj T*
+(python -m pip install -r requirements.txt) Tj T*
+(python -m scripts.download_data) Tj T*
+(python -m scripts.prepare_data) Tj T*
+(python -m scripts.eda) Tj T*
+ET
+endstream
+endobj
+10 0 obj
+<< /Length 2114 >>
+stream
+BT
+/F1 8.5 Tf
+50 780 Td
+11 TL
+(python -m scripts.train --tracking-uri file:./mlruns) Tj T*
+(python -m pytest -q) Tj T*
+(uvicorn app.api:app --host 0.0.0.0 --port 8000) Tj T*
+() Tj T*
+() Tj T*
+(The single learning notebook, when present under notebooks/, explains the same lifecycle) Tj T*
+(interactively. The scripts remain the source of truth for CI/CD because they are) Tj T*
+(deterministic command-line entry points.) Tj T*
+() Tj T*
+(13. EVIDENCE CHECKLIST) Tj T*
+() Tj T*
+(The final submission should contain original screenshots with readable timestamps or) Tj T*
+(workflow links:) Tj T*
+() Tj T*
+(1. Dataset download and processed row count.) Tj T*
+(2. EDA plots.) Tj T*
+(3. MLflow run page or local MLflow artifact listing.) Tj T*
+(4. Test and lint success.) Tj T*
+(5. Docker build and local /health response.) Tj T*
+(6. Local /predict response.) Tj T*
+(7. GitHub Actions CI success.) Tj T*
+(8. Successful Kubernetes rollout and 1/1 ready pod.) Tj T*
+(9. Successful public /health, /predict, and /metrics responses.) Tj T*
+(10. Short video link showing the end-to-end flow.) Tj T*
+() Tj T*
+(The repository?s evidence/README.md records the expected filenames and prevents accidental) Tj T*
+(submission of fabricated evidence.) Tj T*
+() Tj T*
+(14. LIMITATIONS AND FUTURE IMPROVEMENTS) Tj T*
+() Tj T*
+(The dataset is small, historical, and not sufficient for clinical deployment. Future work) Tj T*
+(should add external validation, calibration, subgroup analysis, threshold selection based on) Tj T*
+(clinical cost, drift monitoring, model registry promotion rules, authenticated API access,) Tj T*
+(TLS, and managed observability.) Tj T*
+() Tj T*
+(The current project demonstrates the engineering lifecycle and reproducibility controls) Tj T*
+(expected in an MLOps assignment. It should not be represented as a medical device or used to) Tj T*
+(make patient-care decisions.) Tj T*
+() Tj T*
+(CONCLUSION) Tj T*
+() Tj T*
+(This repository demonstrates an end-to-end, reproducible ML workflow: scripted data) Tj T*
+(acquisition, explicit preprocessing, model comparison, MLflow tracking, automated tests,) Tj T*
+ET
+endstream
+endobj
+11 0 obj
+<< /Length 375 >>
+stream
+BT
+/F1 8.5 Tf
+50 780 Td
+11 TL
+(Docker packaging, Kubernetes deployment configuration, and operational metrics. The local) Tj T*
+(training and API components are verified. Cloud deployment claims remain conditional on a) Tj T*
+(successful GKE rollout and direct endpoint verification; this distinction keeps the) Tj T*
+(submission technically accurate and auditable.) Tj T*
+ET
+endstream
+endobj
+12 0 obj
+<< /Type /Pages /Kids [13 0 R 14 0 R 15 0 R 16 0 R 17 0 R 18 0 R 19 0 R 20 0 R 21 0 R 22 0 R] /Count 10 >>
+endobj
+13 0 obj
+<< /Type /Page /Parent 12 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 2 0 R >>
+endobj
+14 0 obj
+<< /Type /Page /Parent 12 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 3 0 R >>
+endobj
+15 0 obj
+<< /Type /Page /Parent 12 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 4 0 R >>
+endobj
+16 0 obj
+<< /Type /Page /Parent 12 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 5 0 R >>
+endobj
+17 0 obj
+<< /Type /Page /Parent 12 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 6 0 R >>
+endobj
+18 0 obj
+<< /Type /Page /Parent 12 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 7 0 R >>
+endobj
+19 0 obj
+<< /Type /Page /Parent 12 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 8 0 R >>
+endobj
+20 0 obj
+<< /Type /Page /Parent 12 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 9 0 R >>
+endobj
+21 0 obj
+<< /Type /Page /Parent 12 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 10 0 R >>
+endobj
+22 0 obj
+<< /Type /Page /Parent 12 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 1 0 R >> >> /Contents 11 0 R >>
+endobj
+23 0 obj
+<< /Type /Catalog /Pages 12 0 R >>
+endobj
+xref
+0 24
+0000000000 65535 f 
+0000000009 00000 n 
+0000000079 00000 n 
+0000002621 00000 n 
+0000004382 00000 n 
+0000006753 00000 n 
+0000009008 00000 n 
+0000010800 00000 n 
+0000012585 00000 n 
+0000014789 00000 n 
+0000016838 00000 n 
+0000019005 00000 n 
+0000019432 00000 n 
+0000019555 00000 n 
+0000019683 00000 n 
+0000019811 00000 n 
+0000019939 00000 n 
+0000020067 00000 n 
+0000020195 00000 n 
+0000020323 00000 n 
+0000020451 00000 n 
+0000020579 00000 n 
+0000020708 00000 n 
+0000020837 00000 n 
+trailer
+<< /Size 24 /Root 23 0 R >>
+startxref
+20888
+%%EOF

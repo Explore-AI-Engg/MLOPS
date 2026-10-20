@@ -1,0 +1,6 @@
+NAME                READY   UP-TO-DATE   AVAILABLE   AGE
+heart-disease-api   1/1     1            1           3h39m
+NAME                                 READY   STATUS    RESTARTS   AGE     IP           NODE                                                  NOMINATED NODE   READINESS GATES
+heart-disease-api-6d655b99b7-lcpfl   1/1     Running   0          2m57s   10.36.0.18   gke-heart-disease-cluste-default-pool-f4ca002d-vb09   <none>           <none>
+NAME                TYPE           CLUSTER-IP     EXTERNAL-IP    PORT(S)          AGE     SELECTOR
+heart-disease-api   LoadBalancer   34.118.232.8   104.154.36.8   8000:32612/TCP   3h39m   app=heart-disease-api

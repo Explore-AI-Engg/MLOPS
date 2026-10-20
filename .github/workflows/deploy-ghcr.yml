@@ -3,6 +3,7 @@ name: Deploy heart disease API to GKE
 on:
   push:
     branches:
+      - master
       - main
   workflow_dispatch:
 
@@ -101,8 +102,8 @@ jobs:
         run: |
           kubectl rollout status deployment/heart-disease-api --timeout=180s
 
-        # 🌟 NEW DEBUG STEP: If the rollout fails, this prints container error logs directly inside GitHub Actions
       - name: Print Container Logs and Status on Failure
+        if: failure()
         run: |
           echo "=== POD STATUS ==="
           kubectl get pods -l app=heart-disease-api
@@ -111,10 +112,14 @@ jobs:
           kubectl describe pod -l app=heart-disease-api | tail -n 25
           
           echo "=== APPLICATION ERROR LOGS ==="
-          kubectl logs deployment/heart-disease-api --all-containers=true --tail=100
-          
-          # Force pipeline failure if the rollout status check step timed out
-          kubectl rollout status deployment/heart-disease-api --timeout=1s
+          kubectl logs deployment/heart-disease-api --all-containers=true --tail=200 || true
+
+          echo "=== PREVIOUS APPLICATION ERROR LOGS ==="
+          for POD in $(kubectl get pods -l app=heart-disease-api \
+            -o jsonpath='{.items[*].metadata.name}'); do
+            echo "--- $POD ---"
+            kubectl logs "$POD" --previous --tail=200 || true
+          done
 
       - name: Display Kubernetes status
         run: |

@@ -6,6 +6,8 @@ metadata:
     app: heart-disease-api
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: heart-disease-api
@@ -21,6 +23,13 @@ spec:
           ports:
             - name: http
               containerPort: 8000
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 24
           readinessProbe:
             httpGet:
               path: /health
@@ -39,11 +48,11 @@ spec:
             failureThreshold: 3
           resources:
             requests:
-              cpu: 100m       # 🚀 UPDATED: Increased from 100m for faster startup
-              memory: 256Mi   # 🚀 UPDATED: Increased from 256Mi to accommodate model loading
+              cpu: 50m
+              memory: 64Mi
             limits:
-              cpu: "500m"        # 🚀 UPDATED: Increased from 500m to handle prediction bursts
-              memory: 512Mi     # 🚀 UPDATED: Increased from 512Mi to prevent OOM (Out Of Memory) kills
+              cpu: "250m"
+              memory: 256Mi
 ---
 apiVersion: v1
 kind: Service
