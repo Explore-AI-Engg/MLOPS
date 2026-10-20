@@ -101,7 +101,7 @@ jobs:
         run: |
           kubectl rollout status deployment/heart-disease-api --timeout=180s
 
-          # 🌟 NEW DEBUG STEP: If the rollout fails, this prints container error logs directly inside GitHub Actions
+        # 🌟 NEW DEBUG STEP: If the rollout fails, this prints container error logs directly inside GitHub Actions
       - name: Print Container Logs and Status on Failure
         run: |
           echo "=== POD STATUS ==="
