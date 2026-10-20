@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/sm295@apac.comcast.com/Documents/personal/AI_Ml/AI_Experiment
+  /MLOps/heart-disease-mlops/mlruns/351249596694106357/83891f0f04f144739b76627e046cbb5c/artifacts
+end_time: 1792438246683
+entry_point_name: ''
+experiment_id: '351249596694106357'
+lifecycle_stage: active
+run_id: 83891f0f04f144739b76627e046cbb5c
+run_name: logistic_regression
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1792438246358
+status: 3
+tags: []
+user_id: sm295@apac.comcast.com

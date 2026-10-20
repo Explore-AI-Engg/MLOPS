@@ -1,0 +1,20 @@
+{
+  "model_name": "logistic_regression",
+  "run_id": "a560a5ba4b5646dc8ec837dadfd1d444",
+  "dataset_sha256": "53411b0a9e7b7734e7ac199a1082e4aa10bd525609427083cc3b526d8d8503a5",
+  "selection_metric": "cv_roc_auc",
+  "minimum_cv_roc_auc": 0.7,
+  "cv_metrics": {
+    "accuracy": 0.8471088435374149,
+    "precision": 0.8767529146045769,
+    "recall": 0.783399209486166,
+    "roc_auc": 0.9024931590148981
+  },
+  "holdout_metrics": {
+    "accuracy": 0.8852459016393442,
+    "precision": 0.8387096774193549,
+    "recall": 0.9285714285714286,
+    "roc_auc": 0.9664502164502166
+  },
+  "feature_count": 13
+}

@@ -1,47 +1,57 @@
-name: Build and deploy to GKE
+name: Deploy heart disease API to GKE
 
 on:
   push:
     branches:
-      - master
+      - main
   workflow_dispatch:
 
 permissions:
   contents: read
   packages: write
   id-token: write
-  actions: read       # 🌟 FIX: Grants GITHUB_TOKEN permission to look up cross-workflow run IDs
 
 jobs:
   deploy:
-    name: Build image and deploy to GKE
+    name: Train, build, push, and deploy
     runs-on: ubuntu-latest
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      # 🌟 Get the run ID of the latest successful CI workflow run
-      - name: Get latest CI workflow run ID
-        id: get-run-id
-        run: |
-          RUN_ID=$(gh run list --workflow heart-disease-mlops-ci --branch master --status success --limit 1 --json databaseId --jq '.[0].databaseId')
-          if [ -z "$RUN_ID" ] || [ "$RUN_ID" = "null" ]; then
-            echo "Error: No successful CI runs found for the master branch."
-            exit 1
-          fi
-          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # 🌟 Download the artifact using the retrieved run-id and a GitHub token
-      - name: Download model artifacts
-        uses: actions/download-artifact@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          name: heart-disease-mlops-artifacts
-          path: artifacts/
-          run-id: ${{ steps.get-run-id.outputs.run_id }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Run linting
+        run: |
+          python -m ruff check app scripts tests
+
+      - name: Download dataset
+        run: |
+          python -m scripts.download_data
+
+      - name: Prepare processed data
+        run: |
+          python -m scripts.prepare_data
+
+      - name: Train model artifacts
+        run: |
+          python -m scripts.train --tracking-uri file:./mlruns
+
+      - name: Verify model artifacts
+        run: |
+          test -f artifacts/model.joblib
+          test -f artifacts/model_metadata.json
+          ls -lh artifacts/
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
@@ -82,36 +92,22 @@ jobs:
         run: |
           kubectl apply -f deployment/k8s.yaml
 
-      - name: Update image to this commit
+      - name: Update deployment image
         run: |
-          # 🌟 UPDATED: Directs Kubernetes to run the specific image tag we just built
           kubectl set image deployment/heart-disease-api \
             api=ghcr.io/explore-ai-engg/heart-disease-api:${{ github.sha }}
 
-      - name: Wait for rollout
-        id: rollout
-        continue-on-error: true # 🌟 FIX: Keeps the pipeline moving so the debug log step can print errors
+      - name: Wait for deployment rollout
         run: |
-          kubectl rollout status deployment/heart-disease-api --timeout=240s
+          kubectl rollout status deployment/heart-disease-api --timeout=180s
 
-      # 🌟 NEW DEBUG STEP: If the rollout fails, this prints container error logs directly inside GitHub Actions
-      - name: Print Container Logs and Status on Failure
+      - name: Display Kubernetes status
         run: |
-          echo "=== POD STATUS ==="
-          kubectl get pods -l app=heart-disease-api
-          
-          echo "=== RECENT KUBERNETES EVENTS ==="
-          kubectl describe pod -l app=heart-disease-api | tail -n 25
-          
-          echo "=== APPLICATION ERROR LOGS ==="
-          kubectl logs deployment/heart-disease-api --all-containers=true --tail=100
-          
-          # Force pipeline failure if the rollout status check step timed out
-          kubectl rollout status deployment/heart-disease-api --timeout=1s
-
-      # 🌟 Displays final infrastructure topology status if the rollout succeeded
-      - name: Display deployment status
-        run: |
+          echo "=== DEPLOYMENTS ==="
           kubectl get deployments
+
+          echo "=== PODS ==="
           kubectl get pods
+
+          echo "=== SERVICES ==="
           kubectl get services

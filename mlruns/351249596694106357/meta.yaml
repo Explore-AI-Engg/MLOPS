@@ -1,0 +1,10 @@
+artifact_location: file:///Users/sm295@apac.comcast.com/Documents/personal/AI_Ml/AI_Experiment
+  /MLOps/heart-disease-mlops/mlruns/351249596694106357
+creation_time: 1792438047836
+effective_trace_archival_retention: null
+experiment_id: '351249596694106357'
+last_update_time: 1792438047836
+lifecycle_stage: active
+name: heart-disease-classification
+trace_location: null
+workspace: default
