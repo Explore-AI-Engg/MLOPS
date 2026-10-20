@@ -20,6 +20,13 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      # 1. 🌟 ADD THIS STEP TO FETCH THE MISSING ARTIFACTS FOLDER
+      - name: Download model artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: heart-disease-mlops-artifacts
+          path: artifacts/
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -27,6 +34,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # 2. Docker build will now succeed since artifacts/ is present
       - name: Build Docker image
         run: |
           IMAGE="ghcr.io/explore-ai-engg/heart-disease-api"
