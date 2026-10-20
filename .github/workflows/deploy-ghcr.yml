@@ -3,7 +3,7 @@ name: Build and deploy to GKE
 on:
   push:
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 permissions:
