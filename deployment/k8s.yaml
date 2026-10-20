@@ -44,8 +44,8 @@ spec:
 
           resources:
             requests:
-              cpu: 100m
-              memory: 256Mi
+              cpu: 50m      # 🌟 UPDATED: Lowered from 100m to fit tight cluster space
+              memory: 64Mi  # 🌟 UPDATED: Lowered from 256Mi to allow scheduling
             limits:
               cpu: 500m
               memory: 512Mi
