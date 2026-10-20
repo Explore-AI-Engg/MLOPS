@@ -39,11 +39,11 @@ spec:
             failureThreshold: 3
           resources:
             requests:
-              cpu: 250m       # 🚀 UPDATED: Increased from 100m for faster startup
-              memory: 512Mi   # 🚀 UPDATED: Increased from 256Mi to accommodate model loading
+              cpu: 100m       # 🚀 UPDATED: Increased from 100m for faster startup
+              memory: 256Mi   # 🚀 UPDATED: Increased from 256Mi to accommodate model loading
             limits:
-              cpu: "1"        # 🚀 UPDATED: Increased from 500m to handle prediction bursts
-              memory: 1Gi     # 🚀 UPDATED: Increased from 512Mi to prevent OOM (Out Of Memory) kills
+              cpu: "500m"        # 🚀 UPDATED: Increased from 500m to handle prediction bursts
+              memory: 512Mi     # 🚀 UPDATED: Increased from 512Mi to prevent OOM (Out Of Memory) kills
 ---
 apiVersion: v1
 kind: Service
